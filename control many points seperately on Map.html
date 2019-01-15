@@ -27,10 +27,9 @@
       }
 
       #hide-listings,
-      #show-listings {
-        position: relative;
-        width: 49%;
-        margin-left: 3px ;
+      #show-wListings,
+      #show-rListing {
+        width: 20%;
         height: 30px;
         color: green;
         font-weight: bold;
@@ -55,7 +54,8 @@
       <div class="MapBox">
         <h1>Find in Map</h1>
         <div>
-          <input id="show-listings" type="button" value="work places">
+          <input id="show-wListings" type="button" value="work places">
+          <input id="show-rListing" type="button" value="Hangout location">
           <input id="hide-listings" type="button" value="Hide All">
         </div>
         <div id="map"></div>
@@ -68,13 +68,14 @@
       var map;
 
       // Create a new blank array for all the listing markers.
-      var markers = [];
+      var wpMarker = [];
+      var rlMarker = [];
 
       function initMap() {
         // Constructor creates a new map - only center and zoom are required.
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 23.745262, lng:90.368596},
-          zoom: 13,
+          zoom: 10,
           mapTypeControl: false
         });
         var HomeMark = {lat: 23.745262, lng:90.368596};
@@ -86,35 +87,66 @@
 
         // These are the real estate listings that will be shown to the user.
         // Normally we'd have these in a database instead.
-        var locations = [
+        var wpLocations = [
           {title: 'Dhanmondi 32', location: {lat: 23.751696, lng:  90.377848}},
           {title: 'DIU Library', location: {lat: 23.752976, lng: 90.377482 }},
           {title: 'DT-5(Daffodil Tower 5)', location: {lat: 23.754920, lng: 90.376515 }},
+          {title: 'Home', location: {lat: 23.745262, lng:90.368596}}
+        ];
+        var rlLocations = [
+          {title: 'Dhanmondi 32 Cha adda', location: {lat: 23.751282, lng: 90.375196}},
+          {title: 'Dhanmondi 11/A Cha adda', location: {lat: 23.746971,  lng:90.371110, }},
+          {title: 'CSE er road', location: {lat: 23.754767, lng:  90.376606 }},
+          {title: 'Dt5 er road', location: {lat:23.755133, lng:  90.376652 }},
+          {title: 'Arong Field', location: {lat:23.758413, lng:  90.372390 }},
+          {title: 'Shamoli Park', location: {lat:23.773306, lng:  90.365709 }},
           {title: 'Home', location: {lat: 23.745262, lng:90.368596}}
         ];
 
         var largeInfowindow = new google.maps.InfoWindow();
 
         // The following group uses the location array to create an array of markers on initialize.
-        for (var i = 0; i < locations.length; i++) {
+        for (var i = 0; i < wpLocations.length; i++) {
           // Get the position from the location array.
-          var position = locations[i].location;
-          var title = locations[i].title;
-          // Create a marker per location, and put into markers array.
+          var position = wpLocations[i].location;
+          var title = wpLocations[i].title;
+          // Create a marker per location, and put into wpMarker array.
            var marker = new google.maps.Marker({
             position: position,
             title: title,
             animation: google.maps.Animation.DROP,
             id: i
           });
-          // Push the marker to our array of markers.
-          markers.push(marker);
+           // Push the marker to our array of wpMarker.
+          wpMarker.push(marker);
           // Create an onclick event to open an infowindow at each marker.
           marker.addListener('click', function() {
             populateInfoWindow(this, largeInfowindow);
           });
         }
-        document.getElementById('show-listings').addEventListener('click', showListings);
+
+          // The following group uses the relative location array to create an array of markers on initialize.
+        for (var i = 0; i < rlLocations.length; i++) {
+          // Get the position from the location array.
+          var position = rlLocations[i].location;
+          var title = rlLocations[i].title;
+
+          // Create a marker per location, and put into wpMarker array.
+           var marker = new google.maps.Marker({
+            position: position,
+            title: title,
+            animation: google.maps.Animation.DROP,
+            id: i
+          });
+          // Push the marker to our array of wpMarker.
+          rlMarker.push(marker);
+          marker.addListener('click', function() {
+            populateInfoWindow(this, largeInfowindow);
+          });
+          
+        }
+        document.getElementById('show-wListings').addEventListener('click', showWorkListings);
+        document.getElementById('show-rListing').addEventListener('click', showRelativeListings);
         document.getElementById('hide-listings').addEventListener('click', hideListings);
       }
 
@@ -134,21 +166,34 @@
         }
       }
 
-      // This function will loop through the markers array and display them all.
-      function showListings() {
+      // This function will loop through the Work list markers array and display them all.
+      function showWorkListings() {
         var bounds = new google.maps.LatLngBounds();
         // Extend the boundaries of the map for each marker and display the marker
-        for (var i = 0; i < markers.length; i++) {
-          markers[i].setMap(map);
-          bounds.extend(markers[i].position);
+        for (var i = 0; i < wpMarker.length; i++) {
+          wpMarker[i].setMap(map);
+          bounds.extend(wpMarker[i].position);
+        }
+        map.fitBounds(bounds);
+      }
+      // This function will loop through the Relative list markers array and display them all.
+      function showRelativeListings() {
+        var bounds = new google.maps.LatLngBounds();
+        // Extend the boundaries of the map for each marker and display the marker
+        for (var i = 0; i < rlMarker.length; i++) {
+          rlMarker[i].setMap(map);
+          bounds.extend(rlMarker[i].position);
         }
         map.fitBounds(bounds);
       }
 
       // This function will loop through the listings and hide them all.
       function hideListings() {
-        for (var i = 0; i < markers.length; i++) {
-          markers[i].setMap(null);
+        for (var i = 0; i < wpMarker.length; i++) {
+          wpMarker[i].setMap(null);
+        }
+        for (var i = 0; i < rlMarker.length; i++) {
+          rlMarker[i].setMap(null);
         }
       }
     </script>
